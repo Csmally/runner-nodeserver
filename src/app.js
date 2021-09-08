@@ -4,7 +4,6 @@ const express = require('express')
 const app = express()
 app.use(bodyParser.json())
 const models = require('../models')
-const url = '192.168.111.30'
 app.get('/search', async (req, res) => {
     let { name } = req.query
     let user = await models.User.create({

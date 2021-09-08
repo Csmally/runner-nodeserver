@@ -1,31 +1,54 @@
 {
-  "development": {
-    "username": "root",
-    "password": "yzy727196",
-    "database": "runners",
-    "host": "192.168.111.30",
-    "dialect": "mysql",
-    "timezone": "+8:00",
-    "dialectOptions": {
-      "useUTC": false
-    }
-  },
-  "test": {
-    "username": "root",
-    "password": null,
-    "database": "database_test",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
-  },
-  "production": {
-    "username": "root",
-    "password": "yzy727196",
-    "database": "zhengshi",
-    "host": "192.168.111.30",
-    "dialect": "mysql",
-    "timezone": "+8:00",
-    "dialectOptions": {
-      "useUTC": false
+    "development-Home": {
+      "username": "root",
+      "password": "yzy727196",
+      "database": "runners",
+      "host": "192.168.111.30",
+      "dialect": "mysql",
+      "timezone": "+8:00",
+      "dialectOptions": {
+        "useUTC": false
+      }
+    },
+    "development-Company": {
+      "username": "root",
+      "password": "yzy727196",
+      "database": "runners-dev",
+      "host": "localhost",
+      "dialect": "mysql",
+      "timezone": "+8:00",
+      "dialectOptions": {
+        "useUTC": false
+      }
+    },
+    "test": {
+      "username": "root",
+      "password": null,
+      "database": "database_test",
+      "host": "127.0.0.1",
+      "dialect": "mysql"
+    },
+    "production-Home": {
+      "username": "root",
+      "password": "yzy727196",
+      "database": "zhengshi",
+      "host": "192.168.111.30",
+      "dialect": "mysql",
+      "timezone": "+8:00",
+      "dialectOptions": {
+        "useUTC": false
+      }
+    },
+    "production-Company": {
+      "username": "root",
+      "password": "yzy727196",
+      "database": "runners-prod",
+      "host": "localhost",
+      "dialect": "mysql",
+      "timezone": "+8:00",
+      "dialectOptions": {
+        "useUTC": false
+      }
     }
   }
-}
+  
