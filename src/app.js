@@ -1,5 +1,5 @@
 //web服务
-const host = process.env.NODE_ENV == 'production' ? '127.0.0.2' : '127.0.0.19'
+const host = process.env.NODE_ENV == 'production' ? '0.0.0.0' : '127.0.0.19'
 const bodyParser = require('body-parser')
 const express = require('express')
 const app = express()
