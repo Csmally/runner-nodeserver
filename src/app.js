@@ -1,4 +1,5 @@
 //web服务
+const host = process.env.NODE_ENV == 'production' ? '127.0.0.2' : '127.0.0.19'
 const bodyParser = require('body-parser')
 const express = require('express')
 const app = express()
@@ -19,7 +20,7 @@ app.post('/userInfo_add', async (req, res, next) => {
 app.post('/userInfo_search', async (req, res, next) => {
     try {
         let userInfo = await models.userInfo.findOne({
-            where:req.body
+            where: req.body
         })
         res.send({
             userInfo,
@@ -33,9 +34,9 @@ app.post('/userInfo_update', async (req, res, next) => {
     try {
         let { searchParams, updateParams } = req.body
         let userInfo = await models.userInfo.findOne({
-            where:searchParams
+            where: searchParams
         })
-        if(userInfo){
+        if (userInfo) {
             userInfo = await userInfo.update(updateParams)
         }
         res.send({
@@ -48,10 +49,10 @@ app.post('/userInfo_update', async (req, res, next) => {
 })
 
 //上线测试
-app.get('/test',async(req,res,next)=>{
-    console.log('环境变量',process.env.NODE_ENV)
+app.get('/test', async (req, res, next) => {
     try {
         res.send({
+            env: process.env.NODE_ENV,
             message: '上线测试成功！'
         })
     } catch (error) {
@@ -65,7 +66,7 @@ app.use((err, req, res, next) => {
         })
     }
 })
-app.listen(8087, '127.0.0.1', () => {
+app.listen(8087, host, () => {
     console.log('express服务启动成功啦！')
 })
 
