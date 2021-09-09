@@ -4,16 +4,6 @@ const express = require('express')
 const app = express()
 app.use(bodyParser.json())
 const models = require('../models')
-app.get('/search', async (req, res) => {
-    let { name } = req.query
-    let user = await models.User.create({
-        name
-    })
-    console.log('环境变量', process.env.NODE_ENV)
-    res.json({
-        message: '创建成功！'
-    })
-})
 
 app.post('/userInfo_add', async (req, res, next) => {
     try {
@@ -50,7 +40,7 @@ app.post('/userInfo_update', async (req, res, next) => {
         }
         res.send({
             userInfo,
-            message: '查询成功！'
+            message: '修改成功！'
         })
     } catch (error) {
         next(error)
@@ -59,6 +49,7 @@ app.post('/userInfo_update', async (req, res, next) => {
 
 //上线测试
 app.get('/test',async(req,res,next)=>{
+    console.log('环境变量',process.env.NODE_ENV)
     try {
         res.send({
             message: '上线测试成功！'
@@ -74,7 +65,7 @@ app.use((err, req, res, next) => {
         })
     }
 })
-app.listen(80, () => {
+app.listen(8087, '127.0.0.1', () => {
     console.log('express服务启动成功啦！')
 })
 
