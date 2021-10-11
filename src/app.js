@@ -10,11 +10,11 @@ const models = require('../models')
 var request = require('request');
 var xmlreader = require("xmlreader");
 var wxpay = require('./wxpayUtils');
-var appid = "wx4ee88cd48b98fc02"// 小程序的appid
-var appsecret ="61803b757df764b876cc3e8c95c0df92"// 小程序的appSecret
-var mch_id = "1614817099"; // 微信商户号
-var mchkey = "YZY727196960116cywyrljl888888888";  // 微信商户的key 32位
-var notify_url = "http://127.0.0.19:8087/wxpayresult" //通知地址
+var wxKeysConfig = require('../config/wxKeysConfig');
+var appid = wxKeysConfig.appid// 小程序的appid
+var mch_id = wxKeysConfig.mch_id; // 微信商户号
+var mchkey = wxKeysConfig.mchkey;  // 微信商户的key 32位
+var notify_url = wxKeysConfig.notify_url //通知地址
 var url = 'https://api.mch.weixin.qq.com/pay/unifiedorder';//微信支付统一调用接口
 
 app.post('/userInfo_add', async (req, res, next) => {
