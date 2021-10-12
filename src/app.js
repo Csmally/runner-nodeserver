@@ -115,10 +115,9 @@ app.post("/wxpay", async (req,res) => {
 })
 
 app.post('/wxpayresult', async (req, res, next) => {
-    console.log('支付结果',res)
     try {
         res.send({
-            res
+            wxPayResult: req.body
         })
     } catch (error) {
         next(error)
