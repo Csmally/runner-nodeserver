@@ -1,7 +1,13 @@
 //web服务
-const host = process.env.NODE_ENV == 'production' ? '0.0.0.0' : '127.0.0.19'
+const host = process.env.NODE_ENV == 'production' ? '0.0.0.0' : 'localhost'
 const bodyParser = require('body-parser')
 const express = require('express')
+const fs = require('fs')
+const https = require('https')
+const httpsOptions = {
+    cert: fs.readFileSync('./https/1_www.runners.ink_bundle.crt','utf8'),
+    key: fs.readFileSync('./https/2_www.runners.ink.key','utf8')
+}
 const app = express()
 app.use(bodyParser.json())
 const models = require('../models')
@@ -141,9 +147,10 @@ app.use((err, req, res, next) => {
         })
     }
 })
-app.listen(8087, host, () => {
-    console.log('express服务启动成功啦！')
-})
+https.createServer(httpsOptions,app).listen(443,host)
+// app.listen(8087, host, () => {
+//     console.log('express服务启动成功啦！')
+// })
 
 
 //配置nodemon
