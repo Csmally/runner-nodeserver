@@ -23,7 +23,7 @@ var mchkey = wxKeysConfig.mchkey;  // 微信商户的key 32位
 var notify_url = wxKeysConfig.notify_url //通知地址
 var url = 'https://api.mch.weixin.qq.com/pay/unifiedorder';//微信支付统一调用接口
 
-app.post('/userInfo_add', async (req, res, next) => {
+app.post('/wx/userInfo_add', async (req, res, next) => {
     try {
         let userInfo = await models.userInfo.create(req.body)
         res.send({
@@ -34,7 +34,7 @@ app.post('/userInfo_add', async (req, res, next) => {
         next(error)
     }
 })
-app.post('/userInfo_search', async (req, res, next) => {
+app.post('/wx/userInfo_search', async (req, res, next) => {
     try {
         let userInfo = await models.userInfo.findOne({
             where: req.body
@@ -47,7 +47,7 @@ app.post('/userInfo_search', async (req, res, next) => {
         next(error)
     }
 })
-app.post('/userInfo_update', async (req, res, next) => {
+app.post('/wx/userInfo_update', async (req, res, next) => {
     try {
         let { searchParams, updateParams } = req.body
         let userInfo = await models.userInfo.findOne({
@@ -66,7 +66,7 @@ app.post('/userInfo_update', async (req, res, next) => {
 })
 
 
-app.post("/wxpay", async (req,res) => {
+app.post("/wx/wxpay", async (req,res) => {
     let out_trade_no = new Date().getTime()
     let money = req.body.money
     let openid = req.body.openid
@@ -120,7 +120,7 @@ app.post("/wxpay", async (req,res) => {
     });
 })
 
-app.post('/wxpayresult', async (req, res, next) => {
+app.post('/wx/wxpayresult', async (req, res, next) => {
     try {
         res.send({
             wxPayResult: req.body
@@ -130,7 +130,7 @@ app.post('/wxpayresult', async (req, res, next) => {
     }
 })
 //上线测试
-app.get('/test', async (req, res, next) => {
+app.get('/wx/test', async (req, res, next) => {
     try {
         res.send({
             env: process.env.NODE_ENV,
@@ -147,7 +147,7 @@ app.use((err, req, res, next) => {
         })
     }
 })
-https.createServer(httpsOptions,app).listen(443,host)
+https.createServer(httpsOptions,app).listen(8087,host)
 // app.listen(8087, host, () => {
 //     console.log('express服务启动成功啦！')
 // })
