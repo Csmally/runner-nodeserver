@@ -1,5 +1,5 @@
 //web服务
-const host = process.env.NODE_ENV == 'production' ? '0.0.0.0' : '127.0.0.19'
+const host = process.env.NODE_ENV == 'production' ? '0.0.0.0' : '192.168.111.238'
 const bodyParser = require('body-parser')
 const express = require('express')
 const app = express()
@@ -17,9 +17,24 @@ var mchkey = wxKeysConfig.mchkey;  // 微信商户的key 32位
 var notify_url = wxKeysConfig.notify_url //通知地址
 var url = 'https://api.mch.weixin.qq.com/pay/unifiedorder';//微信支付统一调用接口
 
+//访问微信服务器获取用户信息
+app.post('/getUeserInfoFromWx', async (req, res, next) => {
+    try {
+        request('https://api.weixin.qq.com/sns/jscode2session?appid='+req.body.appid+'&secret='+req.body.secret+'&js_code='+req.body.js_code+'&grant_type=authorization_code',function (err, response, body) {
+            if (!err && response.statusCode == 200) {
+                res.send({
+                    data: {...JSON.parse(body),message: '获取成功！'}
+                })
+            }
+        })
+    } catch (error) {
+        next(error)
+    }
+})
+
 app.post('/userInfo_add', async (req, res, next) => {
     try {
-        let userInfo = await models.userInfo.create(req.body)
+        let userInfo = await models.users.create(req.body)
         res.send({
             userInfo,
             message: '创建成功！'
@@ -30,7 +45,7 @@ app.post('/userInfo_add', async (req, res, next) => {
 })
 app.post('/userInfo_search', async (req, res, next) => {
     try {
-        let userInfo = await models.userInfo.findOne({
+        let userInfo = await models.users.findOne({
             where: req.body
         })
         res.send({
@@ -44,7 +59,7 @@ app.post('/userInfo_search', async (req, res, next) => {
 app.post('/userInfo_update', async (req, res, next) => {
     try {
         let { searchParams, updateParams } = req.body
-        let userInfo = await models.userInfo.findOne({
+        let userInfo = await models.users.findOne({
             where: searchParams
         })
         if (userInfo) {
