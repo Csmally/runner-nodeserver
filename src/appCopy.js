@@ -1,6 +1,13 @@
+//web服务
 const host = process.env.NODE_ENV == 'production' ? '0.0.0.0' : '192.168.111.238'
 const bodyParser = require('body-parser')
 const express = require('express')
+const fs = require('fs')
+const https = require('https')
+const httpsOptions = {
+    cert: fs.readFileSync('./https/1_www.runners.ink_bundle.crt', 'utf8'),
+    key: fs.readFileSync('./https/2_www.runners.ink.key', 'utf8')
+}
 const app = express()
 app.use(bodyParser.json())
 const models = require('../models')
@@ -42,7 +49,7 @@ app.post('/userInfo_add', async(req, res, next) => {
         next(error)
     }
 })
-app.post('/userInfo_search', async(req, res, next) => {
+app.post('/wx/userInfo_search', async(req, res, next) => {
     try {
         let userInfo = await models.users.findOne({
             where: req.body
@@ -55,7 +62,7 @@ app.post('/userInfo_search', async(req, res, next) => {
         next(error)
     }
 })
-app.post('/userInfo_update', async(req, res, next) => {
+app.post('/wx/userInfo_update', async(req, res, next) => {
     try {
         let { searchParams, updateParams } = req.body
         let userInfo = await models.users.findOne({
@@ -74,7 +81,7 @@ app.post('/userInfo_update', async(req, res, next) => {
 })
 
 
-app.post("/wxpay", async(req, res) => {
+app.post("/wx/wxpay", async(req, res) => {
     let out_trade_no = new Date().getTime()
     let money = req.body.money
     let openid = req.body.openid
@@ -128,7 +135,7 @@ app.post("/wxpay", async(req, res) => {
     });
 })
 
-app.post('/wxpayresult', async(req, res, next) => {
+app.post('/wx/wxpayresult', async(req, res, next) => {
         try {
             res.send({
                 wxPayResult: req.body
@@ -138,7 +145,7 @@ app.post('/wxpayresult', async(req, res, next) => {
         }
     })
     //上线测试
-app.get('/test', async(req, res, next) => {
+app.get('/wx/test', async(req, res, next) => {
     try {
         res.send({
             env: process.env.NODE_ENV,
@@ -155,9 +162,10 @@ app.use((err, req, res, next) => {
         })
     }
 })
-app.listen(8087, host, () => {
-    console.log('express服务启动成功啦！')
-})
+https.createServer(httpsOptions, app).listen(8087, host)
+    // app.listen(8087, host, () => {
+    //     console.log('express服务启动成功啦！')
+    // })
 
 
 //配置nodemon
