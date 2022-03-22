@@ -1,5 +1,5 @@
 //web服务
-const host = process.env.NODE_ENV == 'production' ? '0.0.0.0' : '192.168.111.238'
+const host = process.env.NODE_ENV == 'production' ? '0.0.0.0' : '192.168.1.7'
 const bodyParser = require('body-parser')
 const express = require('express')
 const fs = require('fs')
@@ -38,48 +38,9 @@ app.post('/wx/getUeserInfoFromWx', async(req, res, next) => {
     }
 })
 
-app.post('/wx/userInfo_add', async(req, res, next) => {
-    try {
-        let userInfo = await models.users.create(req.body)
-        res.send({
-            userInfo,
-            message: '创建成功！'
-        })
-    } catch (error) {
-        next(error)
-    }
-})
-app.post('/wx/userInfo_search', async(req, res, next) => {
-    try {
-        let userInfo = await models.users.findOne({
-            where: req.body
-        })
-        res.send({
-            userInfo,
-            message: '查询成功！'
-        })
-    } catch (error) {
-        next(error)
-    }
-})
-app.post('/wx/userInfo_update', async(req, res, next) => {
-    try {
-        let { searchParams, updateParams } = req.body
-        let userInfo = await models.users.findOne({
-            where: searchParams
-        })
-        if (userInfo) {
-            userInfo = await userInfo.update(updateParams)
-        }
-        res.send({
-            userInfo,
-            message: '修改成功！'
-        })
-    } catch (error) {
-        next(error)
-    }
-})
-
+app.use('/wx/txCos',require('./routers/txCos.js'))
+app.use('/wx/userInfo',require('./routers/userInfo.js'));
+app.use('/wx/campus',require('./routers/campus.js'));
 
 app.post("/wx/wxpay", async(req, res) => {
     let out_trade_no = new Date().getTime()
