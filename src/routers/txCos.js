@@ -40,7 +40,7 @@ router.post('/upload', multerMiddleware.single('file'), async (req, res, next) =
         cos.putObject({
             Bucket: 'runners-1307290574', /* 填入您自己的存储桶，必须字段 */
             Region: 'ap-beijing',  /* 存储桶所在地域，例如ap-beijing，必须字段 */
-            Key: req.file.originalname,  /* 存储在桶里的对象键（例如1.jpg，a/b/test.txt），必须字段 */
+            Key: req.body.folder + req.file.originalname,  /* 存储在桶里的对象键（例如1.jpg，a/b/test.txt），必须字段 */
             Body: Buffer.from(req.file.buffer), /* 必须 */
         }, function (err, data) {
             if (err) {
