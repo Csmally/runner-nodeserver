@@ -30,10 +30,11 @@ router.post('/search', async(req, res, next) => {
 router.post('/update', async(req, res, next) => {
     try {
         let { searchParams, updateParams } = req.body
-        await models.users.update(updateParams,{
+        let data = await models.users.update(updateParams,{
             where:searchParams
         })
         res.send({
+            data,
             message: '修改成功！'
         })
     } catch (error) {

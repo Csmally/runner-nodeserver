@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   zheda.init({
+    campus: DataTypes.STRING,
     goodsName: DataTypes.STRING,
     goodsAddress: DataTypes.STRING,
     goodsPrice: DataTypes.FLOAT,

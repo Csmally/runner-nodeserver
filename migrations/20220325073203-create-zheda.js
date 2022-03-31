@@ -8,6 +8,9 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      campus: {
+        type: Sequelize.STRING
+      },
       goodsName: {
         type: Sequelize.STRING
       },

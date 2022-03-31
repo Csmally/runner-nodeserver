@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   yuncheng.init({
+    campus: DataTypes.STRING,
     goodsName: DataTypes.STRING,
     goodsAddress: DataTypes.STRING,
     goodsPrice: DataTypes.FLOAT,
