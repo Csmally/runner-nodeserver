@@ -1,6 +1,19 @@
 const express = require('express')
 var router = express.Router();
 const models = require('../../models')
+const { Op } = require('sequelize')
+
+const formatParam = function(param) {
+    let newParam = {}
+    for (const key in param) {
+        if(key[0]==="$"){
+            newParam[Op[key.slice(1)]] = param[key]
+        }else {
+            newParam[key] = param[key]
+        }
+    }
+    return newParam
+}
 
 router.post('/add', async (req, res, next) => {
     try {
@@ -16,8 +29,10 @@ router.post('/add', async (req, res, next) => {
 
 router.post('/search', async (req, res, next) => {
     try {
+        let { param } = req.body
+        let newParam = formatParam(param)
         let data = await models[req.body.dbTable].findAll({
-            where: req.body.param
+            where: newParam
         })
         res.send({
             data,

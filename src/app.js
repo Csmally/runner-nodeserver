@@ -4,13 +4,13 @@ const bodyParser = require('body-parser')
 const express = require('express')
 const fs = require('fs')
 const https = require('https')
+const http = require('http')
 const httpsOptions = {
     cert: fs.readFileSync('./https/1_www.runners.ink_bundle.crt', 'utf8'),
     key: fs.readFileSync('./https/2_www.runners.ink.key', 'utf8')
 }
 const path = require('path')
 const app = express()
-// app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json())
 const models = require('../models')
 
@@ -134,7 +134,7 @@ app.use((err, req, res, next) => {
 if (process.env.NODE_ENV == 'production') {
     https.createServer(httpsOptions, app).listen(8087, host)
 } else {
-    app.listen(8087, host, () => {
+    http.createServer(app).listen(8087, host, () => {
         console.log('express服务启动成功啦！')
     })
 }
