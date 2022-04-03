@@ -131,13 +131,60 @@ app.use((err, req, res, next) => {
     }
 })
 
-if (process.env.NODE_ENV == 'production') {
-    https.createServer(httpsOptions, app).listen(8087, host)
-} else {
-    http.createServer(app).listen(8087, host, () => {
-        console.log('express服务启动成功啦！')
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
+io.on('connection', (socket) => {
+    const { id } = socket;
+    console.log('a user connected', id);
+    socket.on("userData", async (data) => {
+        let findData = await models.sockets.findOne({
+            where: { openid: data.openid }
+        })
+        if (findData) {
+            await models.sockets.update({ socketid: data.socketid, type: data.type }, {
+                where: { openid: data.openid }
+            })
+        } else {
+            await models.sockets.create(data)
+        }
+        // await models.sockets.create(data)
+        console.log("服务器通过id发送注册消息", data);
+    });
+    socket.on("isChatLogTable", async (data) => {
+        let findChatLog = await models.chatlogs.findOne({
+            where: { orderid: data.orderid }
+        })
+        if (findChatLog) {
+            socket.emit("getAllChatLog", { allChatLog: JSON.parse(findChatLog.content) })
+        } else {
+            await models.chatlogs.create({ orderid: data.orderid, content: "[]" })
+        }
     })
-}
+    socket.on('sendMessage', async (data) => {
+        let findData = await models.sockets.findOne({
+            where: { openid: data.toopenid }
+        })
+        if (findData && findData.type === "1") {
+            socket.to(findData.socketid).emit("message", { msgData: data.msgData })
+        } else {
+            console.log('9898走公众号')
+        }
+        let findChatLog = await models.chatlogs.findOne({
+            where: { orderid: data.msgData.orderid }
+        })
+        let newContentArr = JSON.parse(findChatLog.content)
+        newContentArr.push(data.msgData)
+        let newContentStr = JSON.stringify(newContentArr)
+        await models.chatlogs.update({ content: newContentStr }, {
+            where: { orderid: data.msgData.orderid }
+        })
+    })
+    socket.on('disconnect', () => {
+        console.log('9898断开了')
+    })
+});
+server.listen(8087, host)
 
 
 //配置nodemon
