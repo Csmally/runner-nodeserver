@@ -1,20 +1,13 @@
 //web服务
+const cluster = require('cluster');
+const cpuNum = require('os').cpus().length;
 const host = process.env.NODE_ENV == 'production' ? '0.0.0.0' : '192.168.1.7'
 const bodyParser = require('body-parser')
 const express = require('express')
-const fs = require('fs')
-const https = require('https')
 const http = require('http')
-const httpsOptions = {
-    cert: fs.readFileSync('./https/1_www.runners.ink_bundle.crt', 'utf8'),
-    key: fs.readFileSync('./https/2_www.runners.ink.key', 'utf8')
-}
-const path = require('path')
-const app = express()
-app.use(bodyParser.json())
 const models = require('../models')
 
-//微信支付
+//微信支付参数
 var request = require('request');
 var xmlreader = require("xmlreader");
 var wxpay = require('./wxpayUtils');
@@ -25,6 +18,15 @@ var mchkey = wxKeysConfig.mchkey; // 微信商户的key 32位
 var notify_url = wxKeysConfig.notify_url //通知地址
 var url = 'https://api.mch.weixin.qq.com/pay/unifiedorder'; //微信支付统一调用接口
 
+const app = express()
+app.use(bodyParser.json())
+//业务逻辑
+app.use('/wx/txCos', require('./routers/txCos.js'))
+app.use('/wx/userInfo', require('./routers/userInfo.js'));
+app.use('/wx/campus', require('./routers/campus.js'));
+app.use('/wx/order', require('./routers/order.js'));
+
+//微信相关接口
 //访问微信服务器获取用户信息
 app.post('/wx/getUeserInfoFromWx', async (req, res, next) => {
     try {
@@ -40,10 +42,6 @@ app.post('/wx/getUeserInfoFromWx', async (req, res, next) => {
     }
 })
 
-app.use('/wx/txCos', require('./routers/txCos.js'))
-app.use('/wx/userInfo', require('./routers/userInfo.js'));
-app.use('/wx/campus', require('./routers/campus.js'));
-app.use('/wx/order', require('./routers/order.js'));
 //微信支付
 app.post("/wx/wxpay", async (req, res) => {
     try {
@@ -112,6 +110,7 @@ app.post('/wx/wxpayresult', async (req, res, next) => {
         next(error)
     }
 })
+
 //上线测试
 app.get('/wx/test', async (req, res, next) => {
     try {
@@ -135,8 +134,6 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 io.on('connection', (socket) => {
-    const { id } = socket;
-    console.log('a user connected', id);
     socket.on("userData", async (data) => {
         let findData = await models.sockets.findOne({
             where: { openid: data.openid }
@@ -148,15 +145,13 @@ io.on('connection', (socket) => {
         } else {
             await models.sockets.create(data)
         }
-        // await models.sockets.create(data)
-        console.log("服务器通过id发送注册消息", data);
     });
     socket.on("isChatLogTable", async (data) => {
         let findChatLog = await models.chatlogs.findOne({
             where: { orderid: data.orderid }
         })
         if (findChatLog) {
-            socket.emit("getAllChatLog", { allChatLog: JSON.parse(findChatLog.content) })
+            socket.to(data.socketid).emit("getAllChatLog", { allChatLog: JSON.parse(findChatLog.content) })
         } else {
             await models.chatlogs.create({ orderid: data.orderid, content: "[]" })
         }
@@ -166,7 +161,7 @@ io.on('connection', (socket) => {
             where: { openid: data.toopenid }
         })
         if (findData && findData.type === "1") {
-            socket.to(findData.socketid).emit("message", { msgData: data.msgData })
+            socket.to(findData.socketid).emit("onMessage", { msgData: data.msgData })
         } else {
             console.log('9898走公众号')
         }
