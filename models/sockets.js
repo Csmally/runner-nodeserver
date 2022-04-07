@@ -16,7 +16,8 @@ module.exports = (sequelize, DataTypes) => {
   sockets.init({
     openid: DataTypes.STRING,
     socketid: DataTypes.STRING,
-    type: DataTypes.STRING
+    type: DataTypes.STRING,
+    serverId: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'sockets',

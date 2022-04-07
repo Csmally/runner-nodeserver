@@ -17,6 +17,9 @@ module.exports = {
       type: {
         type: Sequelize.STRING
       },
+      serverId: {
+        type: Sequelize.STRING
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
