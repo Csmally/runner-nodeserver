@@ -34,28 +34,13 @@ router.post('/search', async (req, res, next) => {
 router.post('/update', async (req, res, next) => {
     try {
         let { searchParams, updateParams, dbTable } = req.body
-        let data = await models[dbTable].findByPk(searchParams.id)
-        if (data && data.status === 1) {
-            await models[dbTable].update(updateParams, {
-                where: searchParams
-            })
-            res.send({
-                code: "1",
-                message: '修改成功！'
-            })
-        } else {
-            if (data) {
-                res.send({
-                    code: "2",
-                    message: '不可修改！'
-                })
-            } else {
-                res.send({
-                    code: "3",
-                    message: '未找到数据！'
-                })
-            }
-        }
+        let data = await models[dbTable].update(updateParams, {
+            where: searchParams
+        })
+        res.send({
+            code: data[0],
+            message: data[0] === 0 ? '修改失败！' : '修改成功！'
+        })
     } catch (error) {
         next(error)
     }
