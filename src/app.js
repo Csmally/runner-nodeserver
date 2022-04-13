@@ -43,6 +43,7 @@ if (cluster.isMaster) {
     app.use('/wx/userInfo', require('./routers/userInfo.js'));
     app.use('/wx/campus', require('./routers/campus.js'));
     app.use('/wx/order', require('./routers/order.js'));
+    app.use('/wx/chatLogs', require('./routers/chatLogs'));
 
     //微信相关接口
     //访问微信服务器获取用户信息
