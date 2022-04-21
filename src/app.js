@@ -1,7 +1,6 @@
 //web服务
 const cluster = require('cluster');
 const cpuNum = require('os').cpus().length;
-console.log('启动线程数：',cpuNum)
 const host = process.env.NODE_ENV == 'production' ? '0.0.0.0' : '192.168.1.7'
 const bodyParser = require('body-parser')
 const express = require('express')

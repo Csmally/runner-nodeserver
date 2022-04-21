@@ -18,9 +18,11 @@ router.post('/add', async (req, res, next) => {
 router.post('/search', async (req, res, next) => {
     try {
         let { param } = req.body
-        let newParam = formatParam(param)
+        formatParam(param)
         let data = await models[req.body.dbTable].findAll({
-            where: newParam
+            where: param,
+            order: [["id", "DESC"]],
+            ...req.body.otherParam
         })
         res.send({
             data,

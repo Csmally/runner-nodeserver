@@ -6,9 +6,9 @@ const { formatParam } = require('../utils.js')
 router.post('/search', async (req, res, next) => {
     try {
         let { param } = req.body
-        let newParam = formatParam(param)
+        formatParam(param)
         let data = await models.chatlogs.findAll({
-            where: newParam
+            where: param
         })
         res.send({
             data,
