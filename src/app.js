@@ -6,37 +6,57 @@ const bodyParser = require('body-parser')
 const express = require('express')
 const http = require('http')
 const models = require('../models')
-
-//微信支付参数
-var request = require('request');
-var xmlreader = require("xmlreader");
-var wxpay = require('./wxpayUtils');
-var wxKeysConfig = require('../config/wxKeysConfig');
-var appid = wxKeysConfig.appid // 小程序的appid
-var mch_id = wxKeysConfig.mch_id; // 微信商户号
-var mchkey = wxKeysConfig.mchkey; // 微信商户的key 32位
-var notify_url = wxKeysConfig.notify_url //通知地址
-var url = 'https://api.mch.weixin.qq.com/pay/unifiedorder'; //微信支付统一调用接口
+const schedule = require("node-schedule");
+const { getToken } = require("./utils")
 
 if (cluster.isMaster) {
+    let miniProgramToken
+    let serviceAccountToken
     let workers = {}
     for (var i = 0; i < cpuNum; i++) {
         let worker = cluster.fork()
         workers[worker.id] = worker
     }
+    getToken("miniProgram").then(res => {
+        miniProgramToken = res
+        getToken("serviceAccount").then(res1 => {
+            serviceAccountToken = res1
+            for (const key in workers) {
+                workers[key].send({ type: "changeToken", miniProgramToken, serviceAccountToken })
+            }
+        })
+    })
     cluster.on("message", (worker, message, handle) => {
-        workers[message.workerId].send({ msgData: message.msgData, socketid: message.socketid })
+        workers[message.workerId].send({ type: "webSocket", msgData: message.msgData, socketid: message.socketid })
     })
     cluster.on('exit', (worker, code, signal) => {
         let newWorker = cluster.fork();
         workers[newWorker.id] = newWorker
     });
+    const job = schedule.scheduleJob("0 0 */1 * * *", function () {
+        let miniProgramToken
+        let serviceAccountToken
+        getToken("miniProgram").then(res => {
+            miniProgramToken = res
+            getToken("serviceAccount").then(res1 => {
+                serviceAccountToken = res1
+                for (const key in workers) {
+                    workers[key].send({ type: "changeToken", miniProgramToken, serviceAccountToken })
+                }
+            })
+        })
+    });
 } else {
+    const app = express()
     let workerId = cluster.worker.id
     process.on("message", (data) => {
-        io.sockets.sockets.get(data.socketid).emit("onMessage", { msgData: data.msgData })
+        if (data.type === "changeToken") {
+            app.set("miniProgramToken", data.miniProgramToken)
+            app.set("serviceAccountToken", data.serviceAccountToken)
+        } else {
+            io.sockets.sockets.get(data.socketid).emit("onMessage", { msgData: data.msgData })
+        }
     })
-    const app = express()
     app.use(bodyParser.json())
     //业务逻辑
     app.use('/wx/txCos', require('./routers/txCos.js'))
@@ -44,91 +64,7 @@ if (cluster.isMaster) {
     app.use('/wx/campus', require('./routers/campus.js'));
     app.use('/wx/order', require('./routers/order.js'));
     app.use('/wx/chatLogs', require('./routers/chatLogs'));
-
-    //微信相关接口
-    //访问微信服务器获取用户信息
-    app.post('/wx/getUeserInfoFromWx', async (req, res, next) => {
-        try {
-            request('https://api.weixin.qq.com/sns/jscode2session?appid=' + req.body.appid + '&secret=' + req.body.secret + '&js_code=' + req.body.js_code + '&grant_type=authorization_code', function (err, response, body) {
-                if (!err && response.statusCode == 200) {
-                    res.send({
-                        data: { ...JSON.parse(body), message: '获取成功！' }
-                    })
-                }
-            })
-        } catch (error) {
-            next(error)
-        }
-    })
-
-    //微信支付
-    app.post("/wx/wxpay", async (req, res) => {
-        try {
-            let out_trade_no = new Date().getTime()
-            let money = req.body.price
-            let openid = req.body.openid
-            let nonce_str = wxpay.createNonceStr();
-            let timestamp = wxpay.createTimeStamp();
-            let body = '测试微信支付';
-            let total_fee = wxpay.getmoney(money);
-            let spbill_create_ip = req.connection.remoteAddress; // 服务ip
-            let trade_type = 'JSAPI' // 小程序： 'JSAPI'
-            let sign = wxpay.paysignjsapi(appid, openid, body, mch_id, nonce_str, notify_url, out_trade_no, spbill_create_ip, total_fee, trade_type, mchkey)
-            //组装xml数据
-            var formData = "<xml>";
-            formData += "<appid>" + appid + "</appid>";
-            formData += "<body><![CDATA[" + "测试微信支付" + "]]></body>";
-            formData += "<mch_id>" + mch_id + "</mch_id>";
-            formData += "<nonce_str>" + nonce_str + "</nonce_str>";
-            formData += "<notify_url>" + notify_url + "</notify_url>";
-            formData += "<openid>" + openid + "</openid>";
-            formData += "<out_trade_no>" + out_trade_no + "</out_trade_no>";
-            formData += "<spbill_create_ip>" + spbill_create_ip + "</spbill_create_ip>";
-            formData += "<total_fee>" + total_fee + "</total_fee>";
-            formData += "<trade_type>JSAPI</trade_type>";
-            formData += "<sign>" + sign + "</sign>";
-            formData += "</xml>";
-            // 请求微信统一支付接口
-            request({ url: url, method: 'POST', body: formData }, function (err, response, body) {
-                if (!err && response.statusCode == 200) {
-                    xmlreader.read(body.toString("utf-8"), function (errors, response) {
-                        if (null !== errors) {
-                            return;
-                        }
-                        var prepay_id = response.xml.prepay_id.text();
-                        let package = "prepay_id=" + prepay_id;
-                        let signType = "MD5";
-                        let minisign = wxpay.paysignjsapix(appid, nonce_str, package, signType, timestamp, mchkey);
-                        // 返回数据到前端
-                        res.send({
-                            status: '200',
-                            data: {
-                                'appId': appid,
-                                'mchid': mch_id,
-                                'prepayId': prepay_id,
-                                'nonceStr': nonce_str,
-                                'timeStamp': timestamp,
-                                'package': package,
-                                'paySign': minisign
-                            }
-                        });
-                    });
-                }
-            });
-        } catch (error) {
-            next(error)
-        }
-    })
-
-    app.post('/wx/wxpayresult', async (req, res, next) => {
-        try {
-            res.send({
-                wxPayResult: req.body
-            })
-        } catch (error) {
-            next(error)
-        }
-    })
+    app.use('/wx/wxApi', require('./routers/wxApi'));
 
     //上线测试
     app.get('/wx/test', async (req, res, next) => {
@@ -196,7 +132,6 @@ if (cluster.isMaster) {
             })
         })
         socket.on('disconnect', async (data) => {
-            console.log('9898关闭了',socket.id)
             await models.sockets.update({ type: "2" }, {
                 where: { socketid: socket.id }
             })
