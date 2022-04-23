@@ -98,17 +98,17 @@ if (cluster.isMaster) {
                     where: { openid: data.openid }
                 })
             } else {
-                await models.sockets.create(data)
+                await models.sockets.create({ ...data, serverId: workerId })
             }
         });
         socket.on("isChatLogTable", async (data) => {
-            let findChatLog = await models.chatlogs.findOne({
+            let findChatLog = await models[data.dbTable].findOne({
                 where: { orderid: data.orderid }
             })
             if (findChatLog) {
                 socket.emit("getAllChatLog", { allChatLog: JSON.parse(findChatLog.content) })
             } else {
-                await models.chatlogs.create({ orderid: data.orderid, content: "[]" })
+                await models[data.dbTable].create({ orderid: data.orderid, content: "[]" })
             }
         })
         socket.on('sendMessage', async (data) => {
