@@ -26,15 +26,9 @@ module.exports = (sequelize, DataTypes) => {
     price: DataTypes.FLOAT,
     photos: DataTypes.STRING,
     desc: DataTypes.STRING,
-    openid: DataTypes.STRING,
+    publisherOpenid: DataTypes.STRING,
     runnerOpenid: DataTypes.STRING,
-    status: DataTypes.INTEGER,
-    avatarUrl: DataTypes.STRING,
-    gender: DataTypes.STRING,
-    nickName: DataTypes.STRING,
-    runnerAvatarUrl: DataTypes.STRING,
-    runnerGender: DataTypes.STRING,
-    runnerNickName: DataTypes.STRING
+    status: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'qinghua_orders',

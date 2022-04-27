@@ -44,7 +44,7 @@ module.exports = {
       desc: {
         type: Sequelize.STRING
       },
-      openid: {
+      publisherOpenid: {
         type: Sequelize.STRING
       },
       runnerOpenid: {
@@ -52,24 +52,6 @@ module.exports = {
       },
       status: {
         type: Sequelize.INTEGER
-      },
-      avatarUrl: {
-        type: Sequelize.STRING
-      },
-      gender: {
-        type: Sequelize.STRING
-      },
-      nickName: {
-        type: Sequelize.STRING
-      },
-      runnerAvatarUrl: {
-        type: Sequelize.STRING
-      },
-      runnerGender: {
-        type: Sequelize.STRING
-      },
-      runnerNickName: {
-        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,

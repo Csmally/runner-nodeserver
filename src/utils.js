@@ -31,6 +31,14 @@ function setDBTableContact() {
     //此处应该建立关联关系表，暂时开发方便写死
     models["qinghua_orders"].hasMany(models["qinghua_orderchats"], { sourceKey: "orderid", foreignKey: "orderid", as: "chatList" })
     models["qinghua_orderchats"].belongsTo(models["qinghua_orders"], { targetKey: "orderid", foreignKey: "orderid", as: "chatList" })
+
+    models["qinghua_orders"].hasOne(models["users"],{ sourceKey: "publisherOpenid", foreignKey: "openid", as: "publisherInfo" })
+    models["users"].belongsTo(models["qinghua_orders"],{ targetKey: "publisherOpenid", foreignKey: "openid", as: "publisherInfo" })
+    models["qinghua_orders"].hasOne(models["users"],{ sourceKey: "runnerOpenid", foreignKey: "openid", as: "runnerInfo" })
+    models["users"].belongsTo(models["qinghua_orders"],{ targetKey: "runnerOpenid", foreignKey: "openid", as: "runnerInfo" })
+
+    models["qinghua_orders"].hasOne(models["qinghua_chatlogs"], { sourceKey: "orderid", foreignKey: "orderid", as: "chatLogs" })
+    models["qinghua_chatlogs"].belongsTo(models["qinghua_orders"], { targetKey: "orderid", foreignKey: "orderid", as: "chatLogs" })
 }
 
 function getToken(type) {

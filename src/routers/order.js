@@ -18,15 +18,42 @@ router.post('/add', async (req, res, next) => {
 router.post('/search', async (req, res, next) => {
     try {
         let { param } = req.body
+        let include = null
         formatParam(param)
-        console.log('9898表名', req.body.dbTable)
-        const data = await models[req.body.dbTable + "_orders"].findAll({
-            include: [
+        if (req.body.type === "orderMainList") {
+            include = [
                 {
                     model: models[req.body.dbTable + "_orderchats"],
                     as: "chatList"
+                },
+                {
+                    model: models.users,
+                    as: "publisherInfo"
+                },
+                {
+                    model: models.users,
+                    as: "runnerInfo"
                 }
-            ],
+            ]
+        }
+        if (req.body.type === "orderPageList") {
+            include = [
+                {
+                    model: models[req.body.dbTable + "_chatlogs"],
+                    as: "chatLogs"
+                },
+                {
+                    model: models.users,
+                    as: "publisherInfo"
+                },
+                {
+                    model: models.users,
+                    as: "runnerInfo"
+                }
+            ]
+        }
+        const data = await models[req.body.dbTable + "_orders"].findAll({
+            include,
             where: param,
             order: [["id", "DESC"]],
             ...req.body.otherParam
