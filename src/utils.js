@@ -2,8 +2,9 @@ const { Op } = require('sequelize')
 var request = require('request');
 var serviceAccountConfig = require('../config/serviceAccount.json')
 var wxKeysConfig = require('../config/wxKeysConfig.json');
+var models = require('../models')
 
-const formatParam = function (param) {
+function formatParam(param) {
     if (typeof param === "object") {
         //引用类型
         if (Array.isArray(param)) {
@@ -26,16 +27,22 @@ const formatParam = function (param) {
     }
 }
 
+function setDBTableContact() {
+    //此处应该建立关联关系表，暂时开发方便写死
+    models["qinghua_orders"].hasMany(models["qinghua_orderchats"], { sourceKey: "orderid", foreignKey: "orderid", as: "chatList" })
+    models["qinghua_orderchats"].belongsTo(models["qinghua_orders"], { targetKey: "orderid", foreignKey: "orderid", as: "chatList" })
+}
+
 function getToken(type) {
     return new Promise((resolve, reject) => {
         request(`https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${type === 'miniProgram' ? wxKeysConfig.appid : serviceAccountConfig.appid}&secret=${type === 'miniProgram' ? wxKeysConfig.appsecret : serviceAccountConfig.appsecret}`, function (err, response, body) {
             if (!err && response.statusCode == 200) {
                 resolve(JSON.parse(body).access_token)
-            }else{
+            } else {
                 reject()
             }
         })
     })
 }
 
-module.exports = { formatParam, getToken }
+module.exports = { formatParam, getToken, setDBTableContact }

@@ -19,8 +19,14 @@ router.post('/search', async (req, res, next) => {
     try {
         let { param } = req.body
         formatParam(param)
-        console.log('9898表名',req.body.dbTable)
-        let data = await models[req.body.dbTable].findAll({
+        console.log('9898表名', req.body.dbTable)
+        const data = await models[req.body.dbTable + "_orders"].findAll({
+            include: [
+                {
+                    model: models[req.body.dbTable + "_orderchats"],
+                    as: "chatList"
+                }
+            ],
             where: param,
             order: [["id", "DESC"]],
             ...req.body.otherParam

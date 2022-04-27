@@ -7,7 +7,7 @@ const express = require('express')
 const http = require('http')
 const models = require('../models')
 const schedule = require("node-schedule");
-const { getToken } = require("./utils")
+const { getToken, setDBTableContact } = require("./utils")
 
 if (cluster.isMaster) {
     let miniProgramToken
@@ -47,6 +47,7 @@ if (cluster.isMaster) {
         })
     });
 } else {
+    setDBTableContact()
     const app = express()
     let workerId = cluster.worker.id
     process.on("message", (data) => {
@@ -65,6 +66,7 @@ if (cluster.isMaster) {
     app.use('/wx/order', require('./routers/order.js'));
     app.use('/wx/chatLogs', require('./routers/chatLogs'));
     app.use('/wx/wxApi', require('./routers/wxApi'));
+    app.use('/wx/orderOpration', require('./routers/orderOpration'));
 
     //上线测试
     app.get('/wx/test', async (req, res, next) => {
@@ -121,13 +123,13 @@ if (cluster.isMaster) {
             } else {
                 console.log('9898走公众号')
             }
-            let findChatLog = await models.chatlogs.findOne({
+            let findChatLog = await models[data.dbTable].findOne({
                 where: { orderid: data.msgData.orderid }
             })
             let newContentArr = JSON.parse(findChatLog.content)
             newContentArr.push(data.msgData)
             let newContentStr = JSON.stringify(newContentArr)
-            await models.chatlogs.update({ content: newContentStr }, {
+            await models[data.dbTable].update({ content: newContentStr }, {
                 where: { orderid: data.msgData.orderid }
             })
         })

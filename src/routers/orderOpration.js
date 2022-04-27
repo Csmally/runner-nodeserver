@@ -3,11 +3,24 @@ var router = express.Router();
 const models = require('../../models')
 const { formatParam } = require('../utils.js')
 
+router.post('/add', async (req, res, next) => {
+    try {
+        let { param, dbTable } = req.body
+        formatParam(param)
+        let data = await models[dbTable].create(param)
+        res.send({
+            message: '操作成功！'
+        })
+    } catch (error) {
+        next(error)
+    }
+})
+
 router.post('/search', async (req, res, next) => {
     try {
-        let { param } = req.body
+        let { param, dbTable } = req.body
         formatParam(param)
-        let data = await models[req.body.dbTable].findAll({
+        let data = await models[dbTable].findAll({
             where: param
         })
         res.send({
