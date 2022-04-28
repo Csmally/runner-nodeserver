@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('qinghua_orderchats', {
+    await queryInterface.createTable('qinghua_orderlikes', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -14,11 +14,8 @@ module.exports = {
       openid: {
         type: Sequelize.STRING
       },
-      name: {
-        type: Sequelize.STRING
-      },
-      content: {
-        type: Sequelize.STRING
+      status: {
+        type: Sequelize.BOOLEAN
       },
       createdAt: {
         allowNull: false,
@@ -31,6 +28,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('qinghua_orderchats');
+    await queryInterface.dropTable('qinghua_orderlikes');
   }
 };

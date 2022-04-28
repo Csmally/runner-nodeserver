@@ -32,6 +32,9 @@ function setDBTableContact() {
     models["qinghua_orders"].hasMany(models["qinghua_orderchats"], { sourceKey: "orderid", foreignKey: "orderid", as: "chatList" })
     models["qinghua_orderchats"].belongsTo(models["qinghua_orders"], { targetKey: "orderid", foreignKey: "orderid", as: "chatList" })
 
+    models["qinghua_orders"].hasMany(models["qinghua_orderlikes"], { sourceKey: "orderid", foreignKey: "orderid", as: "orderlikes" })
+    models["qinghua_orderlikes"].belongsTo(models["qinghua_orders"], { targetKey: "orderid", foreignKey: "orderid", as: "orderlikes" })
+
     models["qinghua_orders"].hasOne(models["users"],{ sourceKey: "publisherOpenid", foreignKey: "openid", as: "publisherInfo" })
     models["users"].belongsTo(models["qinghua_orders"],{ targetKey: "publisherOpenid", foreignKey: "openid", as: "publisherInfo" })
     models["qinghua_orders"].hasOne(models["users"],{ sourceKey: "runnerOpenid", foreignKey: "openid", as: "runnerInfo" })

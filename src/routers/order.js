@@ -27,6 +27,14 @@ router.post('/search', async (req, res, next) => {
                     as: "chatList"
                 },
                 {
+                    model: models[req.body.dbTable + "_orderlikes"],
+                    as: "orderlikes",
+                    where: {
+                        status: true
+                    },
+                    required: false
+                },
+                {
                     model: models.users,
                     as: "publisherInfo"
                 },
