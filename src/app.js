@@ -8,6 +8,7 @@ const http = require('http')
 const models = require('../models')
 const schedule = require("node-schedule");
 const { getToken, setDBTableContact } = require("./utils")
+const { Server } = require("socket.io");
 
 if (cluster.isMaster) {
     let miniProgramToken
@@ -88,7 +89,6 @@ if (cluster.isMaster) {
     })
 
     const server = http.createServer(app);
-    const { Server } = require("socket.io");
     const io = new Server(server);
     io.on('connection', (socket) => {
         socket.on("userData", async (data) => {
