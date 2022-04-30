@@ -60,7 +60,7 @@ router.post('/upload', multerMiddleware.single('file'), async (req, res, next) =
     }
 })
 
-router.post('/saveAvatar',function (req1, res1, next) {
+router.post('/saveAvatar', function (req1, res1, next) {
     try {
         let url = req1.body.filePath
         var req = https.get(url, function (res) {
@@ -69,7 +69,7 @@ router.post('/saveAvatar',function (req1, res1, next) {
             res.on("data", function (chunk) {
                 imgData += chunk;
             });
-            res.on("end",async function () {
+            res.on("end", async function () {
                 await cos.putObject({
                     Bucket: 'runners-1307290574', /* 填入您自己的存储桶，必须字段 */
                     Region: 'ap-beijing',  /* 存储桶所在地域，例如ap-beijing，必须字段 */
@@ -79,11 +79,14 @@ router.post('/saveAvatar',function (req1, res1, next) {
                     if (err) {
                         res1.send({
                             data: err,
-                            message: '成功！'
+                            message: '失败！'
                         });
                     } else {
                         res1.send({
-                            data: data,
+                            data: {
+                                cloudPath: data.Location.replace("runners-1307290574.cos.ap-beijing.myqcloud.com",
+                                    "https://static.runners.ink")
+                            },
                             message: '成功！'
                         });
                     }

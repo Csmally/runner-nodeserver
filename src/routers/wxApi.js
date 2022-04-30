@@ -104,6 +104,29 @@ router.post('/getToken', async (req, res, next) => {
         next(error)
     }
 })
+
+//获取手机号
+router.post('/getPhoneNumber', async (req, res, next) => {
+    try {
+        request({
+            url: `https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token=${req.app.get('miniProgramToken')}`,
+            method: "POST",
+            json: true,
+            headers: {
+                "content-type": "application/json",
+            },
+            body: { code: req.body.code }
+        }, function (err, response, body) {
+            if (!err && response.statusCode == 200) {
+                res.send({
+                    data: { ...body, message: '获取手机号码成功！' }
+                })
+            }
+        })
+    } catch (error) {
+        next(error)
+    }
+})
 //公众号推送
 router.get('/pushServiceAccount', async (req, res, next) => {
     console.log('9898获取微信公众号参数get', req.query)
@@ -119,7 +142,7 @@ router.post('/getServiceUsers', async (req, res, next) => {
         request(`https://api.weixin.qq.com/cgi-bin/user/get?access_token=${req.app.get("serviceAccountToken")}`, function (err, response, body) {
             if (!err && response.statusCode == 200) {
                 res.send({
-                    userList:JSON.parse(body),
+                    userList: JSON.parse(body),
                     message: "查询成功！"
                 })
             }
