@@ -139,6 +139,21 @@ router.get('/pushServiceAccount', async (req, res, next) => {
 
 router.post('/getServiceUsers', async (req, res, next) => {
     try {
+        request(`https://api.weixin.qq.com/cgi-bin/user/info?access_token=${req.app.get("serviceAccountToken")}&openid=oZwN-6Wuzd4heeBT54mdHUqnMSoI&lang=zh_CN`, function (err, response, body) {
+            if (!err && response.statusCode == 200) {
+                res.send({
+                    userList: JSON.parse(body),
+                    message: "查询成功！"
+                })
+            }
+        })
+    } catch (error) {
+        next(error)
+    }
+})
+
+router.post('/getServiceUsers1', async (req, res, next) => {
+    try {
         request(`https://api.weixin.qq.com/cgi-bin/user/get?access_token=${req.app.get("serviceAccountToken")}`, function (err, response, body) {
             if (!err && response.statusCode == 200) {
                 res.send({
