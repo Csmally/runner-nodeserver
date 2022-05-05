@@ -3,17 +3,6 @@ var router = express.Router();
 const { models } = require('../../models')
 const { formatParam } = require('../utils.js')
 
-router.get('/models', async (req, res, next) => {
-    console.log('9898models',models)
-    try {
-        res.send({
-            data: models,
-        })
-    } catch (error) {
-        next(error)
-    }
-})
-
 router.post('/add', async (req, res, next) => {
     try {
         let data = await models[req.body.dbTable].create(req.body)
