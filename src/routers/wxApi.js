@@ -25,7 +25,7 @@ router.post('/getUeserInfoFromWx', async (req, res, next) => {
 //微信支付
 router.post("/wxPay", async (req, res) => {
     try {
-        let out_trade_no = new Date().getTime()
+        let out_trade_no = req.body.orderid
         let money = req.body.price
         let openid = req.body.openid
         let nonce_str = wxpay.createNonceStr();

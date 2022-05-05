@@ -1,6 +1,6 @@
 const express = require('express')
 var router = express.Router();
-const models = require('../../models')
+const { models } = require('../../models')
 const { formatParam } = require('../utils.js')
 
 router.post('/search', async (req, res, next) => {

@@ -1,6 +1,6 @@
 const express = require('express')
 var router = express.Router();
-const models = require('../../models')
+const { models } = require('../../models')
 
 
 router.post('/add', async(req, res, next) => {
@@ -30,11 +30,10 @@ router.post('/search', async(req, res, next) => {
 router.post('/update', async(req, res, next) => {
     try {
         let { searchParams, updateParams } = req.body
-        let data = await models.users.update(updateParams,{
+        await models.users.update(updateParams,{
             where:searchParams
         })
         res.send({
-            data,
             message: '修改成功！'
         })
     } catch (error) {

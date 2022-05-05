@@ -1,7 +1,18 @@
 const express = require('express')
 var router = express.Router();
-const models = require('../../models')
+const { models } = require('../../models')
 const { formatParam } = require('../utils.js')
+
+router.get('/models', async (req, res, next) => {
+    console.log('9898models',models)
+    try {
+        res.send({
+            data: models,
+        })
+    } catch (error) {
+        next(error)
+    }
+})
 
 router.post('/add', async (req, res, next) => {
     try {
@@ -36,11 +47,11 @@ router.post('/search', async (req, res, next) => {
                 },
                 {
                     model: models.users,
-                    as: "publisherInfo"
+                    as: req.body.dbTable + "publisherInfo"
                 },
                 {
                     model: models.users,
-                    as: "runnerInfo"
+                    as: req.body.dbTable + "runnerInfo"
                 }
             ]
         }
@@ -52,11 +63,11 @@ router.post('/search', async (req, res, next) => {
                 },
                 {
                     model: models.users,
-                    as: "publisherInfo"
+                    as: req.body.dbTable + "publisherInfo"
                 },
                 {
                     model: models.users,
-                    as: "runnerInfo"
+                    as: req.body.dbTable + "runnerInfo"
                 }
             ]
         }

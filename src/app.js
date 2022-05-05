@@ -5,42 +5,55 @@ const host = process.env.NODE_ENV == 'production' ? '0.0.0.0' : '192.168.1.7'
 const bodyParser = require('body-parser')
 const express = require('express')
 const http = require('http')
-const models = require('../models')
 const schedule = require("node-schedule");
-const { getToken, setDBTableContact } = require("./utils")
+const { getToken } = require("./utils")
 const { Server } = require("socket.io");
+const { changeModels, initTable } = require('../models')
 
 if (cluster.isMaster) {
-    let miniProgramToken
-    let serviceAccountToken
+    initTable("main")
     let workers = {}
     for (var i = 0; i < cpuNum; i++) {
         let worker = cluster.fork()
         workers[worker.id] = worker
     }
+    //注意此处将来可能出现表未创建的错误
     getToken("miniProgram").then(res => {
-        miniProgramToken = res
+        let miniProgramToken = res
         getToken("serviceAccount").then(res1 => {
-            serviceAccountToken = res1
+            let serviceAccountToken = res1
             for (const key in workers) {
                 workers[key].send({ type: "changeToken", miniProgramToken, serviceAccountToken })
             }
         })
     })
     cluster.on("message", (worker, message, handle) => {
-        workers[message.workerId].send({ type: "webSocket", msgData: message.msgData, socketid: message.socketid })
+        if (message.type === "webSocket") {
+            workers[message.workerId].send({ type: "webSocket", msgData: message.msgData, socketid: message.socketid })
+        }
+        if (message.type === "changeModels") {
+            changeModels(message.dbTable,"main")
+            for (const key in workers) {
+                workers[key].send({ type: "changeModels", dbTable: message.dbTable })
+            }
+        }
     })
     cluster.on('exit', (worker, code, signal) => {
         let newWorker = cluster.fork();
         workers[newWorker.id] = newWorker
+        getToken("miniProgram").then(res => {
+            let miniProgramToken = res
+            getToken("serviceAccount").then(res1 => {
+                let serviceAccountToken = res1
+                newWorker.send({ type: "changeToken", miniProgramToken, serviceAccountToken })
+            })
+        })
     });
     const job = schedule.scheduleJob("0 0 */1 * * *", function () {
-        let miniProgramToken
-        let serviceAccountToken
         getToken("miniProgram").then(res => {
-            miniProgramToken = res
+            let miniProgramToken = res
             getToken("serviceAccount").then(res1 => {
-                serviceAccountToken = res1
+                let serviceAccountToken = res1
                 for (const key in workers) {
                     workers[key].send({ type: "changeToken", miniProgramToken, serviceAccountToken })
                 }
@@ -48,15 +61,20 @@ if (cluster.isMaster) {
         })
     });
 } else {
-    setDBTableContact()
+    const { models } = require('../models')
     const app = express()
+    initTable("server")
     let workerId = cluster.worker.id
     process.on("message", (data) => {
         if (data.type === "changeToken") {
             app.set("miniProgramToken", data.miniProgramToken)
             app.set("serviceAccountToken", data.serviceAccountToken)
-        } else {
+        }
+        if (data.type === "webSocket") {
             io.sockets.sockets.get(data.socketid).emit("onMessage", { msgData: data.msgData })
+        }
+        if (data.type === "changeModels") {
+            changeModels(data.dbTable,"server")
         }
     })
     app.use(bodyParser.json())
