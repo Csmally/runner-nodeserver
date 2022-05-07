@@ -8,7 +8,7 @@ const http = require('http')
 const schedule = require("node-schedule");
 const { getToken } = require("./utils")
 const { Server } = require("socket.io");
-const { changeModels, initTable } = require('../models')
+const { changeModels, initTable, models } = require('../models')
 
 if (cluster.isMaster) {
     initTable("main")
@@ -32,7 +32,7 @@ if (cluster.isMaster) {
             workers[message.workerId].send({ type: "webSocket", msgData: message.msgData, socketid: message.socketid })
         }
         if (message.type === "changeModels") {
-            changeModels(message.dbTable,"main")
+            changeModels(message.dbTable, "main")
             for (const key in workers) {
                 workers[key].send({ type: "changeModels", dbTable: message.dbTable })
             }
@@ -61,7 +61,6 @@ if (cluster.isMaster) {
         })
     });
 } else {
-    const { models } = require('../models')
     const app = express()
     initTable("server")
     let workerId = cluster.worker.id
@@ -74,7 +73,7 @@ if (cluster.isMaster) {
             io.sockets.sockets.get(data.socketid).emit("onMessage", { msgData: data.msgData })
         }
         if (data.type === "changeModels") {
-            changeModels(data.dbTable,"server")
+            changeModels(data.dbTable, "server")
         }
     })
     app.use(bodyParser.json())
