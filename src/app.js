@@ -9,6 +9,7 @@ const schedule = require("node-schedule");
 const { getToken } = require("./utils")
 const { Server } = require("socket.io");
 const { changeModels, initTable, models } = require('../models')
+const xmlparser = require('express-xml-bodyparser')
 
 if (cluster.isMaster) {
     initTable("main")
@@ -77,6 +78,7 @@ if (cluster.isMaster) {
         }
     })
     app.use(bodyParser.json())
+    app.use(xmlparser())
     //业务逻辑
     app.use('/wx/txCos', require('./routers/txCos.js'))
     app.use('/wx/userInfo', require('./routers/userInfo.js'));
