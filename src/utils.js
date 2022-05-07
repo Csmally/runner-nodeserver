@@ -69,6 +69,7 @@ async function serviceAccountCB(xmlData, access_token) {
                 }
             }
             if (xmlData.event[0] === "unsubscribe") {
+                let serviceAccountUserData = await getServiceAccountUserInfo(xmlData.fromusername[0], access_token)
                 await models.users.update({ serviceOpenid: null }, {
                     where: { serviceOpenid: serviceAccountUserData.openid }
                 })
