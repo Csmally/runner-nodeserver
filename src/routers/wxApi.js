@@ -137,6 +137,15 @@ router.get('/pushServiceAccount', async (req, res, next) => {
     }
 })
 
+router.post('/pushServiceAccount', async (req, res, next) => {
+    console.log('9898获取微信公众号参数post', req.body)
+    try {
+        res.end("")
+    } catch (error) {
+        next(error)
+    }
+})
+
 router.post('/getServiceUsers', async (req, res, next) => {
     try {
         request(`https://api.weixin.qq.com/cgi-bin/user/info?access_token=${req.app.get("serviceAccountToken")}&openid=oZwN-6Wuzd4heeBT54mdHUqnMSoI&lang=zh_CN`, function (err, response, body) {
