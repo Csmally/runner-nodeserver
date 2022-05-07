@@ -5,6 +5,7 @@ var xmlreader = require("xmlreader");
 var wxpay = require('../wxpayUtils');
 var serviceAccountConfig = require('../../config/serviceAccount.json')
 var wxKeysConfig = require('../../config/wxKeysConfig.json');
+var { serviceAccountCB, getServiceAccountUserInfo } = require('../utils')
 
 //微信相关接口
 //访问微信服务器获取用户信息
@@ -129,7 +130,6 @@ router.post('/getPhoneNumber', async (req, res, next) => {
 })
 //公众号推送
 router.get('/pushServiceAccount', async (req, res, next) => {
-    console.log('9898获取微信公众号参数get', req.query)
     try {
         res.end(req.query.echostr)
     } catch (error) {
@@ -138,38 +138,20 @@ router.get('/pushServiceAccount', async (req, res, next) => {
 })
 
 router.post('/pushServiceAccount', async (req, res, next) => {
-    console.log('9898获取微信公众号参数post', req.body)
     try {
+        serviceAccountCB(req.body.xml,req.app.get('serviceAccountToken'))
         res.end("")
     } catch (error) {
         next(error)
     }
 })
 
-router.post('/getServiceUsers', async (req, res, next) => {
+router.post('/getServiceUserInfo', async (req, res, next) => {
     try {
-        request(`https://api.weixin.qq.com/cgi-bin/user/info?access_token=${req.app.get("serviceAccountToken")}&openid=oZwN-6Wuzd4heeBT54mdHUqnMSoI&lang=zh_CN`, function (err, response, body) {
-            if (!err && response.statusCode == 200) {
-                res.send({
-                    userList: JSON.parse(body),
-                    message: "查询成功！"
-                })
-            }
-        })
-    } catch (error) {
-        next(error)
-    }
-})
-
-router.post('/getServiceUsers1', async (req, res, next) => {
-    try {
-        request(`https://api.weixin.qq.com/cgi-bin/user/get?access_token=${req.app.get("serviceAccountToken")}`, function (err, response, body) {
-            if (!err && response.statusCode == 200) {
-                res.send({
-                    userList: JSON.parse(body),
-                    message: "查询成功！"
-                })
-            }
+        let serviceAccountUserInfo = await getServiceAccountUserInfo(req.body.serviceOpenid,req.app.get('serviceAccountToken'))
+        res.send({
+            serviceAccountUserInfo,
+            message: '查询成功！'
         })
     } catch (error) {
         next(error)
