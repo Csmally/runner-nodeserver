@@ -6,10 +6,11 @@ const bodyParser = require('body-parser')
 const express = require('express')
 const http = require('http')
 const schedule = require("node-schedule");
-const { getToken } = require("./utils")
+const { getToken } = require("./utils/commonUtils")
 const { Server } = require("socket.io");
 const { changeModels, initTable, models } = require('../models')
 const xmlparser = require('express-xml-bodyparser')
+const socketFunc = require('./utils/socketUtils')
 
 if (cluster.isMaster) {
     initTable("main")
@@ -37,6 +38,9 @@ if (cluster.isMaster) {
             for (const key in workers) {
                 workers[key].send({ type: "changeModels", dbTable: message.dbTable })
             }
+        }
+        if (message.type === "orderChange") {
+            workers[message.workerId].send({ type: "orderChange", msgData: message.msgData, socketid: message.socketid })
         }
     })
     cluster.on('exit', (worker, code, signal) => {
@@ -75,6 +79,9 @@ if (cluster.isMaster) {
         }
         if (data.type === "changeModels") {
             changeModels(data.dbTable, "server")
+        }
+        if (data.type === "orderChange") {
+            io.sockets.sockets.get(data.socketid).emit("orderChange", { msgData: data.msgData })
         }
     })
     app.use(bodyParser.json())
@@ -137,7 +144,7 @@ if (cluster.isMaster) {
                 where: { openid: data.toopenid }
             })
             if (findData && findData.type === "1") {
-                process.send({ workerId: findData.serverId, socketid: findData.socketid, msgData: data.msgData })
+                process.send({ type: "webSocket", workerId: findData.serverId, socketid: findData.socketid, msgData: data.msgData })
                 // socket.to(findData.socketid).emit("onMessage", { msgData: data.msgData })
             } else {
                 console.log('9898走公众号')
@@ -151,6 +158,9 @@ if (cluster.isMaster) {
             await models[data.dbTable].update({ content: newContentStr }, {
                 where: { orderid: data.msgData.orderid }
             })
+        })
+        socket.on('orderChange', async (data) => {
+            socketFunc.orderChange(socket, data, app.get('serviceAccountToken'))
         })
         socket.on('disconnect', async (data) => {
             await models.sockets.update({ type: "2" }, {

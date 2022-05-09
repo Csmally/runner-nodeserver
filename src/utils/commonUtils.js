@@ -1,8 +1,8 @@
 const { Op } = require('sequelize')
 var request = require('request');
-var serviceAccountConfig = require('../config/serviceAccount.json')
-var wxKeysConfig = require('../config/wxKeysConfig.json');
-const { models } = require('../models')
+var serviceAccountConfig = require('../../config/serviceAccount.json')
+var wxKeysConfig = require('../../config/wxKeysConfig.json');
+const { models } = require('../../models')
 
 function formatParam(param) {
     if (typeof param === "object") {

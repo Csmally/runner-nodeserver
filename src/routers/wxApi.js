@@ -2,10 +2,10 @@ const express = require('express')
 var router = express.Router();
 var request = require('request');
 var xmlreader = require("xmlreader");
-var wxpay = require('../wxpayUtils');
+var wxpay = require('../utils/wxpayUtils');
 var serviceAccountConfig = require('../../config/serviceAccount.json')
 var wxKeysConfig = require('../../config/wxKeysConfig.json');
-var { serviceAccountCB, getServiceAccountUserInfo } = require('../utils')
+var { serviceAccountCB, getServiceAccountUserInfo } = require('../utils/commonUtils')
 
 //微信相关接口
 //访问微信服务器获取用户信息
